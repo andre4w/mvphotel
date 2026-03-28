@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel AI Platform — Accedi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      </div>
+      <h1>Hotel AI Platform</h1>
+      <p>L'assistente virtuale intelligente per il tuo hotel</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="showTab('login')">Accedi</button>
+      <button class="auth-tab" id="tab-register" onclick="showTab('register')">Registrati</button>
+    </div>
+
+    <div id="alert-area"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" class="form-control" placeholder="hotel@example.com" required />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>
+        Accedi
+      </button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="reg-name">Nome dell'hotel *</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="Grand Hotel Roma" required />
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email *</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="info@grandhotelroma.it" required />
+      </div>
+      <div class="form-group">
+        <label for="reg-phone">Telefono</label>
+        <input type="tel" id="reg-phone" class="form-control" placeholder="+39 06 1234567" />
+      </div>
+      <div class="form-group">
+        <label for="reg-website">Sito web</label>
+        <input type="url" id="reg-website" class="form-control" placeholder="https://www.grandhotelroma.it" />
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password *</label>
+        <input type="password" id="reg-password" class="form-control" placeholder="Minimo 8 caratteri" minlength="8" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="register-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Crea account
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    function showTab(tab) {
+      document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('alert-area').innerHTML = '';
+    }
+
+    function showAlert(msg, type = 'error') {
+      document.getElementById('alert-area').innerHTML =
+        `<div class="alert alert-${type}">${msg}</div>`;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.textContent = 'Accesso in corso…';
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('login-email').value,
+            password: document.getElementById('login-password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Credenziali non valide');
+        localStorage.setItem('hotel_token', data.access_token);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Accedi';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('register-btn');
+      btn.disabled = true; btn.textContent = 'Creazione account…';
+      try {
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('reg-name').value,
+            email: document.getElementById('reg-email').value,
+            phone: document.getElementById('reg-phone').value || null,
+            website_url: document.getElementById('reg-website').value || null,
+            password: document.getElementById('reg-password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Errore durante la registrazione');
+        localStorage.setItem('hotel_token', data.access_token);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Crea account';
+      }
+    }
+
+    // Redirect if already logged in
+    if (localStorage.getItem('hotel_token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

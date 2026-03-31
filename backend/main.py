@@ -8,6 +8,7 @@ import aiosqlite
 from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from database import init_db, get_db
@@ -337,6 +338,13 @@ async def serve_widget():
     if not os.path.exists(widget_path):
         raise HTTPException(status_code=404, detail="Widget not found")
     return FileResponse(widget_path, media_type="application/javascript")
+
+
+# ─── Serve frontend (dashboard) as static files ───────────────────────────────
+
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+if os.path.exists(frontend_path):
+    app.mount("/app", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

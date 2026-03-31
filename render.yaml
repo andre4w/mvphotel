@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: hotel-ai-platform
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: ./hotel_platform.db
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: hotel-ai-platform
+          property: host

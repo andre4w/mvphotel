@@ -45,7 +45,7 @@ async def get_current_hotel(
     )
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        hotel_id: int = payload.get("sub")
+        hotel_id: int = int(payload.get("sub"))
         if hotel_id is None:
             raise credentials_exception
     except JWTError:

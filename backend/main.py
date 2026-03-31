@@ -57,7 +57,7 @@ async def register(data: HotelRegister, db: aiosqlite.Connection = Depends(get_d
         hotel_id = cur.lastrowid
 
     await db.commit()
-    token = create_access_token({"sub": hotel_id})
+    token = create_access_token({"sub": str(hotel_id)})
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -69,7 +69,7 @@ async def login(data: HotelLogin, db: aiosqlite.Connection = Depends(get_db)):
     if not hotel or not verify_password(data.password, hotel["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({"sub": hotel["id"]})
+    token = create_access_token({"sub": str(hotel["id"])})
     return {"access_token": token, "token_type": "bearer"}
 
 

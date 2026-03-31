@@ -347,6 +347,58 @@ if os.path.exists(frontend_path):
     app.mount("/app", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 
+# ─── Chat test page ───────────────────────────────────────────────────────────
+
+@app.get("/chat-test", response_class=PlainTextResponse)
+async def chat_test_page(token: str = ""):
+    html = f"""<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Chat Widget</title>
+  <style>
+    body {{ font-family: -apple-system, sans-serif; display: flex; align-items: center;
+           justify-content: center; min-height: 100vh; margin: 0;
+           background: linear-gradient(135deg, #1a3c5e, #2d6a9f); color: white; text-align: center; }}
+    .box {{ background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; max-width: 500px; }}
+    h1 {{ margin-bottom: 8px; }}
+    p {{ opacity: 0.8; margin-bottom: 24px; }}
+    input {{ width: 100%; padding: 12px 16px; border-radius: 8px; border: none;
+             font-size: 14px; margin-bottom: 12px; box-sizing: border-box; }}
+    button {{ background: white; color: #1a3c5e; border: none; padding: 12px 32px;
+              border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }}
+    #msg {{ margin-top: 16px; font-size: 13px; opacity: 0.8; }}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🏨 Test Chat Widget</h1>
+    <p>Incolla il tuo Hotel Token dalla dashboard e clicca Avvia</p>
+    <input type="text" id="tok" placeholder="es. c78c137f81d24a0385ba117393c8eb74" value="{token}"/>
+    <button onclick="start()">Avvia chat</button>
+    <div id="msg"></div>
+  </div>
+  <script>
+    function start() {{
+      var t = document.getElementById('tok').value.trim();
+      if (!t) {{ document.getElementById('msg').textContent = 'Inserisci il token!'; return; }}
+      window.HotelAIConfig = {{ hotelToken: t }};
+      var s = document.createElement('script');
+      s.src = window.location.origin + '/widget.js';
+      document.body.appendChild(s);
+      document.getElementById('msg').textContent = '✅ Widget caricato! Guarda in basso a destra 👇';
+    }}
+    // Auto-start if token in URL
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('token')) {{ document.getElementById('tok').value = p.get('token'); start(); }}
+  </script>
+</body>
+</html>"""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(html)
+
+
 # ─── Health check ─────────────────────────────────────────────────────────────
 
 @app.get("/health")
